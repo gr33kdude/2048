@@ -4,6 +4,14 @@
 #include <chrono>
 #include <climits>
 
+#define NCURSES 0
+
+#if NCURSES
+# include <curses.h>
+#else
+# include <termios.h>
+#endif
+
 class Board {
 public:
   constexpr static int kRows = 4;
@@ -128,9 +136,59 @@ std::ostream& operator<<(std::ostream& stream, Board& b) {
   return stream;
 }
 
+void clear_screen() {
+  const char *clrscr = "\x1B[2J";
+  const char *reset_cursor = "\x1B[H";
+  std::cout << clrscr << reset_cursor << std::endl;
+}
+
+
 int main(int argc, char **argv) {
+#if NCURSES
+  initscr();
+
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);
+#else
+#endif
+  
+  struct termios prev{}, input{};
+  int rc = 0;
+
+  rc = tcgetattr(fileno(stdin), &input);
+  if (rc < 0)
+    perror("termios getattr");
+
+  // save the input terminal settings before we mess around with them
+  prev = input;
+
+  input.c_lflag &= ~(ECHO | ICANON);
+
+  rc = tcsetattr(fileno(stdin), TCSANOW, &input);
+  if (rc < 0)
+    perror("termios setattr");
+
   Board game{};
 
-  std::cout << game << std::endl;
+
+  int count = 5;
+  while (count--) {
+    clear_screen();
+
+    std::cout << game << std::endl;
+
+    int c = getchar();
+    std::cout << c << std::endl;
+  }
+
+#if NCURSES
+  endwin();
+#else
+  rc = tcsetattr(fileno(stdin), TCSANOW, &prev);
+  if (rc < 0)
+    perror("reset termios (setattr)");
+#endif
+
   return 0;
 }
