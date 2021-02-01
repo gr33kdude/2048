@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <chrono>
+#include <climits>
 
 class Board {
 public:
@@ -15,10 +17,25 @@ public:
   };
 
   Board() {
+    using hrc = std::chrono::high_resolution_clock;
+    using nano = std::chrono::nanoseconds;
+
+    std::chrono::time_point<hrc> now_tp = hrc::now();
+    auto now_dur = now_tp.time_since_epoch();
+
+    auto now_ns = std::chrono::duration_cast<nano>(now_dur).count();
+    unsigned int seed = now_ns % UINT_MAX;
+
+    std::srand(seed);
+
     for (int r = 0; r < kRows; r++) {
       for (int c = 0; c < kCols; c++) {
         board[r][c] = 0;
       }
+    }
+
+    for (int i = 0; i < 2; i++) {
+      insertRandomValue();
     }
   }
 
@@ -43,20 +60,23 @@ public:
     int insert_value = ((std::rand() % 10) == 0) ? 4 : 2;
 
     int empty_passed = 0;
-    for (int r = 0; r < kRows; r++) {
-      for (int c = 0; c < kCols; c++) {
+    bool done = false;
+    for (int r = 0; !done && r < kRows; r++) {
+      for (int c = 0; !done && c < kCols; c++) {
+        if (board[r][c] != 0)
+          continue;
+
         if (empty_passed == insert_spot) {
+          done = true;
           board[r][c] = insert_value; 
           break;
         }
 
-        if (board[r][c] == 0) {
-          empty_passed++;
-        }
+        empty_passed++;
       }
     }
 
-    if (empty_passed != insert_value)
+    if (empty_passed != insert_spot)
       std::cout << "WAT" << std::endl;
   }
 
@@ -66,9 +86,9 @@ public:
     for (int r = 0; r < kRows; r++) {
       for (int c = 0; c < kCols; c++) {
         int shift = r * 4 + c;
-        int empty = board[r][c] > 0;
+        int empty = (board[r][c] == 0);
 
-        ret |= (!!empty) << shift;
+        ret |= (uint16_t)(!!empty) << shift;
       }
     }
 
