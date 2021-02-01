@@ -1,0 +1,1 @@
+: game.cpp |> g++ -o game game.cpp |> game
