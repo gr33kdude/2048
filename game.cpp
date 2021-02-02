@@ -18,6 +18,7 @@ public:
   constexpr static int kCols = 4;
 
   enum class Direction : int {
+    kUnknown,
     kUp,
     kDown,
     kLeft,
@@ -172,15 +173,65 @@ int main(int argc, char **argv) {
   Board game{};
 
 
-  int count = 5;
-  while (count--) {
+  bool done = false;
+  do {
     clear_screen();
 
     std::cout << game << std::endl;
 
+    auto direction = Board::Direction::kUnknown;
     int c = getchar();
-    std::cout << c << std::endl;
-  }
+
+    switch (c) {
+      case 'w':
+      case 'k':
+        direction = Board::Direction::kUp;
+        break;
+      case 's':
+      case 'j':
+        direction = Board::Direction::kDown;
+        break;
+      case 'a':
+      case 'h':
+        direction = Board::Direction::kLeft;
+        break;
+      case 'd':
+      case 'l':
+        direction = Board::Direction::kRight;
+        break;
+
+      case 'q':
+        done = true;
+        break;
+
+      // SUPER janky arrow-key processing
+      case 27: { // ESC 
+        c = getchar();
+        if (c != '[')
+          continue;
+
+        c = getchar();
+        switch (c) {
+          case 'A':
+            direction = Board::Direction::kUp;
+            break;
+          case 'B':
+            direction = Board::Direction::kDown;
+            break;
+          case 'C':
+            direction = Board::Direction::kRight;
+            break;
+          case 'D':
+            direction = Board::Direction::kLeft;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    game.applyMove(direction);
+  } while (!done);
 
 #if NCURSES
   endwin();
