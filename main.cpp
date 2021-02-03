@@ -4,22 +4,6 @@
 #include <sstream>
 #include <iomanip>
 
-std::ostream& operator<<(std::ostream& stream, Board& b) {
-  for (int r = 0; r < Board::kRows; r++) {
-    for (int c = 0; c < Board::kCols; c++) {
-      stream << std::setw(4) << std::right << b.val(r, c);
-
-      if (c != Board::kCols-1)
-        stream << " | ";
-    }
-
-    if (r != Board::kRows-1)
-      stream << "\n";
-  }
-
-  return stream;
-}
-
 void clear_screen() {
   const char *clrscr = "\x1B[2J";
   const char *reset_cursor = "\x1B[H";

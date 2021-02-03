@@ -154,3 +154,25 @@ uint16_t Board::emptyCells(void) {
 
   return ret;
 }
+
+std::ostream& operator<<(std::ostream& stream, Board& b) {
+  for (int r = 0; r < Board::kRows; r++) {
+    for (int c = 0; c < Board::kCols; c++) {
+      int val = b.val(r, c);
+
+      stream << std::setw(4) << std::right;
+      if (val)
+        stream << val;
+      else
+        stream << "";
+
+      if (c != Board::kCols-1)
+        stream << " | ";
+    }
+
+    if (r != Board::kRows-1)
+      stream << "\n";
+  }
+
+  return stream;
+}
