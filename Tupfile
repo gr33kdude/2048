@@ -1,1 +1,3 @@
-: game.cpp |> g++ -o game game.cpp |> game
+: foreach *.cpp |> g++ -c -o %o %f |> %B.o
+: game.cpp main.cpp |> g++ -o %o %f |> main
+: game.o test_game.cpp |> g++ -o %o %f |> test_game
