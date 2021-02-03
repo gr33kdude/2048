@@ -27,16 +27,26 @@ int main(int argc, char **argv) {
   if (rc < 0)
     perror("termios setattr");
 
-  Board game{};
+  unsigned int seed = 0;
+  if (argc > 1) {
+    seed = (unsigned int)atoi(argv[1]);
+  }
 
+  Board game{seed};
 
-  bool done = false;
+  int turn = 1;
   do {
     clear_screen();
 
+    std::cout << "Turn " << turn << std::endl;
+    std::cerr << "Turn " << turn << std::endl;
+    std::cout << std::endl;
+
     std::cout << game << std::endl;
 
+    bool done = false;
     auto direction = Board::Direction::kUnknown;
+
     int c = getchar();
 
     switch (c) {
@@ -65,7 +75,7 @@ int main(int argc, char **argv) {
       case 27: { // ESC 
         c = getchar();
         if (c != '[')
-          continue;
+          break;
 
         c = getchar();
         switch (c) {
@@ -84,11 +94,24 @@ int main(int argc, char **argv) {
           default:
             break;
         }
+
+        break;
       }
+
+      default:
+         break;
     }
 
+    if (done)
+      break;
+
+    if (direction == Board::Direction::kUnknown)
+      continue;
+
     game.applyMove(direction);
-  } while (!done || !game.checkGameOver());
+
+    turn++;
+  } while (!game.checkGameOver());
 
   rc = tcsetattr(fileno(stdin), TCSANOW, &prev);
   if (rc < 0)

@@ -32,15 +32,17 @@ public:
     kCompress,
   };
 
-  Board() {
-    using hrc = std::chrono::high_resolution_clock;
-    using nano = std::chrono::nanoseconds;
+  Board(unsigned int seed = 0) {
+    if (seed == 0) {
+      using hrc = std::chrono::high_resolution_clock;
+      using nano = std::chrono::nanoseconds;
 
-    std::chrono::time_point<hrc> now_tp = hrc::now();
-    auto now_dur = now_tp.time_since_epoch();
+      std::chrono::time_point<hrc> now_tp = hrc::now();
+      auto now_dur = now_tp.time_since_epoch();
 
-    auto now_ns = std::chrono::duration_cast<nano>(now_dur).count();
-    unsigned int seed = now_ns % UINT_MAX;
+      auto now_ns = std::chrono::duration_cast<nano>(now_dur).count();
+      seed = now_ns % UINT_MAX;
+    }
 
     std::srand(seed);
 
