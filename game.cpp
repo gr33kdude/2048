@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include <map>
+
 bool Board::insertRandomValue() {
   uint16_t empty = emptyCells();
   int num_empty = countBits(empty);
@@ -121,15 +123,49 @@ uint16_t Board::emptyCells(void) {
 }
 
 std::ostream& operator<<(std::ostream& stream, Board& b) {
+  const char *reset_mode = "\e[0m";
+
+  using TC = TerminalColor;
+  constexpr TC kUnknown =
+    TC { TC::Mode::kNormal, TC::FG::kWhite, TC::BG::kBlack, };
+
+  static const std::map<int, TC> val_color = {
+    { 2,    { TC::Mode::kNormal,  TC::FG::kWhite,   TC::BG::kBlack } },
+    { 4,    { TC::Mode::kNormal,  TC::FG::kYellow,  TC::BG::kBlack } },
+    { 8,    { TC::Mode::kNormal,  TC::FG::kBlue,    TC::BG::kBlack } },
+    { 16,   { TC::Mode::kNormal,  TC::FG::kMagenta, TC::BG::kBlack } },
+    { 32,   { TC::Mode::kNormal,  TC::FG::kRed,     TC::BG::kBlack } },
+    { 64,   { TC::Mode::kBold,    TC::FG::kRed,     TC::BG::kBlack } },
+    { 128,  { TC::Mode::kBold,    TC::FG::kMagenta, TC::BG::kBlack } },
+    { 256,  { TC::Mode::kBold,    TC::FG::kBlue,    TC::BG::kBlack } },
+    { 512,  { TC::Mode::kBold,    TC::FG::kYellow,  TC::BG::kBlack } },
+    { 1024, { TC::Mode::kBold,    TC::FG::kWhite,   TC::BG::kBlack } },
+    { 2048, { TC::Mode::kNormal,  TC::FG::kBlack,   TC::BG::kWhite } },
+    { 4096, { TC::Mode::kNormal,  TC::FG::kBlack,   TC::BG::kBlue } },
+  };
+
   for (int r = 0; r < Board::kRows; r++) {
     for (int c = 0; c < Board::kCols; c++) {
-      int val = b.val(r, c);
+      const int val = b.val(r, c);
+
+      auto color_it = val_color.lower_bound(val);
+      TerminalColor color;
+      if (color_it == val_color.end()) {
+        color = kUnknown;
+      } else {
+        color = color_it->second;
+      }
+
+      stream << "\e[" << (int)color.mode << ";" 
+             << (int)color.fg << ";" << (int)color.bg << "m";
 
       stream << std::setw(4) << std::right;
       if (val)
         stream << val;
       else
         stream << "";
+
+      stream << reset_mode;
 
       if (c != Board::kCols-1)
         stream << " | ";

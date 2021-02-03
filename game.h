@@ -15,12 +15,55 @@ class NullBuffer : public std::streambuf {
     int overflow(int c) { return c; }
 };
 
+struct TerminalColor {
+  enum class FG : int {
+    kBlack = 30,
+    kRed = 31,
+    kGreen = 32,
+    kYellow = 33,
+    kBlue = 34,
+    kMagenta = 35,
+    kCyan = 36,
+    kWhite = 37,
+  };
+
+  enum class BG : int {
+    kBlack = 40,
+    kRed = 41,
+    kGreen = 42,
+    kYellow = 43,
+    kBlue = 44,
+    kMagenta = 45,
+    kCyan = 46,
+    kWhite = 47,
+  };
+
+  enum class Mode : int {
+    kReset = 0,
+    kNormal = 0,
+    kBright = 1,
+    kBold = 1,
+    kDim = 2,
+    kUnderlined = 4,
+    kBlink = 5,
+    kReverse = 7,
+    kHidden = 8,
+  };
+
+  constexpr TerminalColor(Mode mode_, FG fg_, BG bg_) : mode(mode_), fg(fg_), bg(bg_) {}
+  constexpr TerminalColor() = default;
+  ~TerminalColor() = default;
+
+  Mode mode = Mode::kReset;
+  FG fg = FG::kWhite;
+  BG bg = BG::kBlack;
+};
+
 class Board {
 public:
   constexpr static int kMax = 4;
   constexpr static int kRows = kMax;
   constexpr static int kCols = kMax;
-
   static_assert(kRows == kCols, "Grid must be a square");
 
   enum class Direction : int {
