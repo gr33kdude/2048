@@ -50,7 +50,9 @@ void Board::unpack(int start, int stride, int arr[]) {
   }
 }
 
-void Board::operation(Direction d, Operation o) {
+bool Board::operation(Direction d, Operation o) {
+  bool did_operation = false;
+
   for (int i = 0; i < 4; i++) {
     int arr[4] = {};
     int start = 0;
@@ -77,23 +79,29 @@ void Board::operation(Direction d, Operation o) {
 
     pack(start, stride, arr);
     if (o == Operation::kSlide) {
-      simple_slide(arr);
+      did_operation |= simple_slide(arr);
     } else if (o == Operation::kCombine) {
-      simple_combine(arr);
-    } else {
+      did_operation |= simple_combine(arr);
+    } else if (o == Operation::kCompress) {
+      did_operation |= compress(arr);
     }
     unpack(start, stride, arr);
   }
+
+  return did_operation;
 }
 
-void Board::combine(Direction d) {
-  operation(d, Operation::kCombine);
+bool Board::combine(Direction d) {
+  return operation(d, Operation::kCombine);
 }
 
-void Board::slide(Direction d) {
-  operation(d, Operation::kSlide);
+bool Board::slide(Direction d) {
+  return operation(d, Operation::kSlide);
 }
 
+bool Board::compress(Direction d) {
+  return operation(d, Operation::kCompress);
+}
 
 #if 0
 // for each of the nonzero final tiles, scan for the next nonzero

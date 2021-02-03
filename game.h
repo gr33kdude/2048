@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include <iostream>
 #include <cstdlib>
 #include <cstdint>
 #include <climits>
@@ -28,6 +29,7 @@ public:
     kUnknown,
     kSlide,
     kCombine,
+    kCompress,
   };
 
   Board() {
@@ -65,9 +67,118 @@ public:
 
   bool insertRandomValue();
 
+  static void debug(const char *s, int arr[], int i, int j) {
+    std::ostream& stream = std::cerr;
+    stream << "[" << s << "] ";
+
+    if (i < kMax) {
+      stream << "a[" << i << "] = " << arr[i];
+    } else {
+      stream << "---";
+    }
+
+    stream << ", ";
+
+    if (j < kMax) {
+      stream << "a[" << j << "] = " << arr[j];
+    } else {
+      stream << "---";
+    }
+
+    stream << std::endl;
+  }
+
+  static bool compress(int arr[]) {
+    bool did_operation = false;
+
+    int i = 0;
+    int j = 1;
+
+    while (j < kMax) {
+      debug("top", arr, i, j);
+      assert(i != j);
+
+      // ensure that the next non-zero value is at [i]
+      while (arr[i] == 0 && j < kMax) {
+        debug("finding nonzero", arr, i, j);
+        if (arr[j] != 0) {
+          // swap [i] and [j]; effectively performs "sliding"
+          int temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
+
+          debug("swap", arr, i, j);
+          did_operation = true;
+        }
+
+        j++;
+      }
+
+      debug("found nonzero", arr, i, j);
+
+      for (int check = i+1; check < j; check++) {
+        assert(arr[check] == 0);
+      }
+
+      if (j == kMax) {
+        // [i] may or may not be 0
+        break;
+      }
+      assert(arr[i] != 0);
+
+      // look for next nonzero to see if combining is possible
+      while (arr[j] == 0 && j < kMax) {
+        j++;
+      }
+      debug("found next nonzero", arr, i, j);
+      if (j == kMax) {
+        // no other number found
+        break;
+      }
+      assert(arr[j] != 0);
+
+      if (arr[i] == arr[j]) {
+        debug("combining", arr, i, j);
+
+        arr[i] *= 2;
+        arr[j] = 0;
+
+        // a combination has occurred; done with finalizing index i
+        did_operation = true;
+      }
+
+      i++;
+      j = i + 1;
+
+      debug("next", arr, i, j);
+    }
+
+    debug("done", arr, i, j);
+
+    bool nonzero = true;
+    for (int idx = 0; idx < kMax; idx++) {
+      if (!nonzero)
+        assert(arr[idx] == 0);
+
+      if (nonzero && arr[idx] == 0) {
+        nonzero = false;
+      }
+    }
+
+    return did_operation;
+  }
+
+  static bool simple_combine(int arr[]) {
+    return false;
+  }
+
+  static bool simple_slide(int arr[]) {
+    return false;
+  }
+
   // in any 4-cell row or column, let the values be:
   // [ a, b, c, d ]
-  static void simple_combine(int arr[]) {
+  static void hw_combine(int arr[]) {
     int a = arr[0];
     int b = arr[1];
     int c = arr[2];
@@ -90,7 +201,7 @@ public:
     arr[3] = D;
   }
   
-  static void simple_slide(int arr[]) {
+  static void hw_slide(int arr[]) {
     int a = arr[0];
     int b = arr[1];
     int c = arr[2];
@@ -133,9 +244,10 @@ public:
     c = idx % kCols;
   }
 
-  void combine(Direction d);
-  void slide(Direction d);
-  void operation(Direction d, Operation o);
+  bool combine(Direction d);
+  bool slide(Direction d);
+  bool compress(Direction d);
+  bool operation(Direction d, Operation o);
 
 #if 0
   void combine(Direction d) {
@@ -152,7 +264,7 @@ public:
         case Direction::kUp:
           first  = { .r = 0, .c = i };
           second = { .r = 2, .c = i };
-          first_r = 0;
+          
           first_c = i;
 
           if (board[0][i] == board[1][i]) {
@@ -211,9 +323,7 @@ public:
   }
 
   void applyMove(Direction d) {
-    slide(d);
-    combine(d);
-    slide(d);
+    compress(d);
 
     insertRandomValue();
     insertRandomValue();
