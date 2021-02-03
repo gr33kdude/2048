@@ -123,6 +123,7 @@ public:
     std::ostream null(&null_buffer);
 
     std::ostream& stream = null;
+    //std::ostream& stream = std::cerr;
     stream << "[" << s << "] ";
 
     if (i < kMax) {
@@ -209,6 +210,7 @@ public:
 
     debug("done", arr, i, j);
 
+    // inline "assert-test" that our values go in nonzero -> zero order
     bool nonzero = true;
     for (int idx = 0; idx < kMax; idx++) {
       if (!nonzero)
@@ -270,11 +272,13 @@ public:
   }
 
   bool applyMove(Direction d) {
-    bool ret = compress(d);
+    if (!compress(d)) {
+      return false;
+    }
 
     insertRandomValue();
 
-    return ret;
+    return true;
   }
 
   static int countBits(uint16_t bits) {
