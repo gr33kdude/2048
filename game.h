@@ -187,68 +187,6 @@ public:
     return false;
   }
 
-  // in any 4-cell row or column, let the values be:
-  // [ a, b, c, d ]
-  static void hw_combine(int arr[]) {
-    int a = arr[0];
-    int b = arr[1];
-    int c = arr[2];
-    int d = arr[3];
-
-    bool AB = a == b;
-    bool BC = b == c;
-    bool CD = c == d;
-
-    int A = AB ? 2*a : a;
-    int B = AB ? (CD ? 2*c : c) \
-           : (BC ? 2*b : b);
-    int C = AB ? (CD ? 0 : d) \
-               : (BC ? d : (CD ? 2*c : d));
-    int D = (AB && BC && CD) ? 0 : d;
-
-    arr[0] = A;
-    arr[1] = B;
-    arr[2] = C;
-    arr[3] = D;
-  }
-  
-  static void hw_slide(int arr[]) {
-    int a = arr[0];
-    int b = arr[1];
-    int c = arr[2];
-    int d = arr[3];
-
-    bool AA = a > 0;
-    bool BB = b > 0;
-    bool CC = c > 0;
-    bool DD = d > 0;
-
-    bool AB = AA && BB;
-    bool BC = BB && CC;
-    bool CD = CC && DD;
-    bool AC = AA && CC;
-    bool ABC = AB && CC;
-    bool ABCD = AB && CD;
-
-    int A = AA ? a \
-         : (BB ? b \
-         : (CC ? c \
-         : (DD ? d : 0)));
-    int B = AB ? b \
-         : (CC && (AA != BB)) ? c \
-         : (DD && (AA != BB != CC)) ? d \
-         : 0;
-    int C = ABC ? c \
-         : (DD && ((!AA && BC) || (!BB && AC) || (!CC && AB))) ? d \
-         : 0;
-    int D = ABCD ? d : 0;
-
-    arr[0] = A;
-    arr[1] = B;
-    arr[2] = C;
-    arr[3] = D;
-  }
-
   static void convert(int start, int stride, int i, int& r, int &c) {
     int idx = start + i*stride;
     r = idx / kRows;
@@ -259,70 +197,6 @@ public:
   bool slide(Direction d);
   bool compress(Direction d);
   bool operation(Direction d, Operation o);
-
-#if 0
-  void combine(Direction d) {
-    for (int i = 0; i < 4; i++) {
-
-      typedef struct pos {
-        int r;
-        int c;
-      } pos;
-      pos first  { .r = 0, .c = 0 };
-      pos second { .r = 0, .c = 0 };
-
-      switch (d) {
-        case Direction::kUp:
-          first  = { .r = 0, .c = i };
-          second = { .r = 2, .c = i };
-          
-          first_c = i;
-
-          if (board[0][i] == board[1][i]) {
-            board[0][i] *= 2;
-            board[1][i] = 0;
-          }
-          if (board[2][i] == board[3][i]) {
-            board[2][i] *= 2;
-            board[3][i] = 0;
-          }
-          break;
-        case Direction::kDown:
-          if (board[3][i] == board[2][i]) {
-            board[3][i] *= 2;
-            board[2][i] = 0;
-          }
-          if (board[1][i] == board[0][i]) {
-            board[1][i] *= 2;
-            board[0][i] = 0;
-          }
-          break;
-        case Direction::kLeft:
-          if (board[i][0] == board[i][1]) {
-            board[i][0] *= 2;
-            board[i][1] = 0;
-          }
-
-          if (board[i][2] == board[i][3]) {
-            board[i][2] *= 2;
-            board[i][3] = 0;
-          }
-          break;
-        case Direction::kDown:
-          if (board[r][i] == board[r+1][i]) {
-            board[r][i] *= 2;
-            board[r+1][i] = 0;
-          }
-
-          if (board[r+2][i] == board[r+3][i]) {
-            board[r+2][i] *= 2;
-            board[r+3][i] = 0;
-          }
-          break;
-      }
-    }
-  }
-#endif
 
   void pack(int start, int stride, int arr[]);
   void unpack(int start, int stride, int arr[]);

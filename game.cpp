@@ -105,51 +105,6 @@ bool Board::compress(Direction d) {
   return operation(d, Operation::kCompress);
 }
 
-#if 0
-// for each of the nonzero final tiles, scan for the next nonzero
-// if equal, combine, otherwise 
-void Board::slide(Direction d) {
-  for (int i = 0; i < 4; i++) {
-    switch (d) {
-      case Direction::kUp:
-        for (int r = 0; r < kRows-1; r++) {
-          if (board[r][i] == 0) {
-            board[r][i] = board[r+1][i];
-            board[r+1][i] = 0;
-          }
-        }
-        break;
-      case Direction::kDown:
-        for (int r = kRows-1; r > 0; r--) {
-          if (board[r][i] == 0) {
-            board[r][i] = board[r-1][i];
-            board[r-1][i] = 0;
-          }
-        }
-        break;
-      case Direction::kLeft:
-        for (int c = 0; c < kCols-1; c++) {
-          if (board[i][c] == 0) {
-            board[i][c] = board[i][c+1];
-            board[i][c+1] = 0;
-          }
-        }
-        break;
-      case Direction::kRight:
-        for (int c = kCols-1; c > 0; c--) {
-          if (board[i][c] == 0) {
-            board[i][c] = board[i][c-1];
-            board[i][c-1] = 0;
-          }
-        }
-        break;
-      default:
-        return;
-    }
-  }
-}
-#endif
-
 uint16_t Board::emptyCells(void) {
   uint16_t ret = 0;
 
