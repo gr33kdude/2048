@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     clear_screen();
 
     std::cout << "Turn " << turn << std::endl;
-    std::cerr << "Turn " << turn << std::endl;
+    //std::cerr << "Turn " << turn << std::endl;
     std::cout << std::endl;
 
     std::cout << game << std::endl;
@@ -107,10 +107,17 @@ int main(int argc, char **argv) {
     if (direction == Board::Direction::kUnknown)
       continue;
 
-    game.applyMove(direction);
-
-    turn++;
+    if (game.applyMove(direction))
+      turn++;
   } while (!game.checkGameOver());
+
+  clear_screen();
+  std::cout << "Turn " << turn << std::endl;
+  std::cout << std::endl;
+  std::cout << "G A M E   O V E R" << std::endl;
+  std::cout << std::endl;
+
+  std::cout << game << std::endl;
 
   rc = tcsetattr(fileno(stdin), TCSANOW, &prev);
   if (rc < 0)

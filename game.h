@@ -10,6 +10,11 @@
 
 #include <assert.h>
 
+class NullBuffer : public std::streambuf {
+  public:
+    int overflow(int c) { return c; }
+};
+
 class Board {
 public:
   constexpr static int kMax = 4;
@@ -71,7 +76,10 @@ public:
   bool insertRandomValue();
 
   static void debug(const char *s, int arr[], int i, int j) {
-    std::ostream& stream = std::cerr;
+    NullBuffer null_buffer;
+    std::ostream null(&null_buffer);
+
+    std::ostream& stream = null;
     stream << "[" << s << "] ";
 
     if (i < kMax) {
@@ -322,14 +330,34 @@ public:
   uint16_t emptyCells(void);
 
   bool checkGameOver() {
-    return emptyCells() == 0;
+    if (emptyCells() > 0)
+      return false;
+
+    for (int r = 0; r < kRows; r++) {
+      for (int c = 0; c < kCols-1; c++) {
+        if (board[r][c] == board[r][c+1]) {
+          return false;
+        }
+      }
+    }
+
+    for (int c = 0; c < kCols; c++) {
+      for (int r = 0; r < kRows-1; r++) {
+        if (board[r][c] == board[r+1][c]) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
-  void applyMove(Direction d) {
-    compress(d);
+  bool applyMove(Direction d) {
+    bool ret = compress(d);
 
     insertRandomValue();
-    insertRandomValue();
+
+    return ret;
   }
 
   static int countBits(uint16_t bits) {
