@@ -4,14 +4,6 @@
 #include <sstream>
 #include <iomanip>
 
-#define NCURSES 0
-
-#if NCURSES
-# include <curses.h>
-#else
-# include <termios.h>
-#endif
-
 std::ostream& operator<<(std::ostream& stream, Board& b) {
   for (int r = 0; r < Board::kRows; r++) {
     for (int c = 0; c < Board::kCols; c++) {
@@ -34,17 +26,7 @@ void clear_screen() {
   std::cout << clrscr << reset_cursor << std::endl;
 }
 
-
 int main(int argc, char **argv) {
-#if NCURSES
-  initscr();
-
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
-#else
-#endif
-  
   struct termios prev{}, input{};
   int rc = 0;
 
@@ -124,13 +106,9 @@ int main(int argc, char **argv) {
     game.applyMove(direction);
   } while (!done || !game.checkGameOver());
 
-#if NCURSES
-  endwin();
-#else
   rc = tcsetattr(fileno(stdin), TCSANOW, &prev);
   if (rc < 0)
     perror("reset termios (setattr)");
-#endif
 
   return 0;
 }
