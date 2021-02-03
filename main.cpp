@@ -1,8 +1,7 @@
 #include "game.h"
 
 #include <iostream>
-#include <sstream>
-#include <iomanip>
+#include <termios.h>
 
 void clear_screen() {
   const char *clrscr = "\x1B[2J";

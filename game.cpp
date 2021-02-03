@@ -1,8 +1,10 @@
 #include "game.h"
 
-#include <iostream>
 #include <cstdint>
 #include <climits>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 bool Board::insertRandomValue() {
   uint16_t empty = emptyCells();

@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <cstdint>
 #include <climits>
@@ -336,6 +337,8 @@ public:
     bits = (bits & 0x33333333) + ((bits >> 2) & 0x33333333);
     return ((bits + (bits >> 4) & 0x0F0F0F0F) * 0x01010101) >> 24;
   }
+
+  friend std::ostream& operator<<(std::ostream& stream, Board& b);
 
 private:
   int board[kRows][kCols];
