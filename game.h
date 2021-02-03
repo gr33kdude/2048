@@ -6,10 +6,15 @@
 #include <cstdint>
 #include <climits>
 
+#include <assert.h>
+
 class Board {
 public:
-  constexpr static int kRows = 4;
-  constexpr static int kCols = 4;
+  constexpr static int kMax = 4;
+  constexpr static int kRows = kMax;
+  constexpr static int kCols = kMax;
+
+  static_assert(kRows == kCols, "Grid must be a square");
 
   enum class Direction : int {
     kUnknown,
@@ -43,9 +48,9 @@ public:
       }
     }
 
-    for (int i = 0; i < 2; i++) {
-      insertRandomValue();
-    }
+    // game starts with 2 random values
+    insertRandomValue();
+    insertRandomValue();
   }
 
   ~Board() {}
